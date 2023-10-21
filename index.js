@@ -7,60 +7,73 @@ dotenv.config();
 const app = express();
 
 app.use(express.json());
-const PORT= 5000;
+const PORT = 5000;
 
 const MONGODB_URI = "";
 
-const connectMongoDB = async()=>{
-    const conn = await mongoose.connect(process.env.MONGODB_URI) 
+const connectMongoDB = async () => {
+    const conn = await mongoose.connect(process.env.MONGODB_URI)
 
-    if (conn){
+    if (conn) {
         console.log('MongoDB connected successfully');
     }
 }
 connectMongoDB();
 
-app.get('/products', async (req,res)=>{
+app.get('/products', async (req, res) => {
 
     const products = await product.find()
     res.json({
         success: true,
-        data:products,
+        data: products,
         message: "Successfully get details of product"
     })
 });
 
-app.post('/product', async (req, res)=>{
-    const {name, description, price, productImage, brand} =req.body;
+app.post('/product', async (req, res) => {
+    const { name, description, price, productImage, brand } = req.body;
 
-    const prod = new product ({
-        name:name,
-        description:description,
-        price:price,
-        productImage:productImage,
-        brand:brand,
+    const prod = new product({
+        name: name,
+        description: description,
+        price: price,
+        productImage: productImage,
+        brand: brand,
     })
 
     const saveproduct = await prod.save();
     res.json({
-        success:true,
+        success: true,
         data: saveproduct,
-        message: 'Successfully added new product',        
+        message: 'Successfully added new product',
     })
 });
 
-app.get('/product', async (req, res)=>{
+app.get('/product', async (req, res) => {
 
-    const {name} = req.query;
+    const { name } = req.query;
 
-    const Product = await product.findOne({name:name})
+    const Product = await product.findOne({ name: name })
     res.json({
-        success:true,
+        success: true,
         data: Product,
-        message:"Get details of products."
+        message: "Get details of products."
     })
-})
+});
 
-app.listen(PORT, ()=>{
+app.delete('/product/:_id', async (req, res) => {
+    const { _id } = req.params;
+    await product.deleteOne({ _id: _id });
+
+    res.json({
+        success: true,
+        data: {},
+        message: `Successfully deleted product with id ${_id}`,
+    })
+});
+
+
+
+app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}.`)
 });
